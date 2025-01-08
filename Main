@@ -1,0 +1,38 @@
+package Passwordcracker;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Set;
+
+public class Main extends Crack {
+
+  
+    
+
+   
+    public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
+        // SHA-256 hash of the password "qwerty"
+        String targetHash = "87806a6421336b6d39091c9c937bc25cc0e66ccd459345469a426bfab1c39b96"; // Example SHA-256 hash
+        String md5Hash = "d8578edf8458ce06fbc5bb76a58c5ca4"; // Example MD5 hash
+
+        // Path to the dictionary file
+        String dictionaryPath = "F:\\SQL\\PASS.txt";
+
+        // Try cracking using SHA-256
+        if (crackPassword(targetHash, dictionaryPath, "SHA-256")) {
+            System.out.println("Password cracked successfully using SHA-256!");
+        } else {
+            System.out.println("Password could not be cracked using SHA-256.");
+        }
+
+        // Try cracking using MD5
+        if (crackPassword(md5Hash, dictionaryPath, "MD5")) {
+            System.out.println("Password cracked successfully using MD5!");
+        } else {
+            System.out.println("Password could not be cracked using MD5.");
+        }
+    }
+}
