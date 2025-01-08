@@ -1,0 +1,160 @@
+package Passwordcracker;
+
+import java.io.BufferedReader;
+
+import java.io.FileReader;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HashSet;
+import java.util.Set;
+
+public class Crack {
+	
+	
+	
+	
+	  // Updated crackPassword method to include algorithm parameter
+    protected static boolean crackPassword(String targetHash, String dictionaryPath, String algorithm) throws NoSuchAlgorithmException, IOException {
+        try (BufferedReader br = new BufferedReader(new FileReader(dictionaryPath))) {
+            String passwordGuess;
+
+            while ((passwordGuess = br.readLine()) != null) {
+                // Get all variations of the password guess
+                Set<String> passwordGuesses = generatePasswordVariations(passwordGuess);
+
+                // Test each guess
+                for (String guess : passwordGuesses) {
+                    // Call hashPassword with the selected algorithm
+                    String hashedGuess = hashPassword(guess, algorithm);
+
+                    // Check if hash matches the target hash
+                    if (hashedGuess.equals(targetHash)) {
+                        System.out.println("Match found! Password is: " + guess);
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+	 // Updated hashPassword method to accept the algorithm as a parameter
+       protected static String hashPassword(String password, String algorithm) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance(algorithm);
+        byte[] hash = md.digest(password.getBytes());
+
+        // Convert byte array into hexadecimal string
+        StringBuilder hexString = new StringBuilder();
+        for (byte b : hash) {
+            hexString.append(String.format("%02x", b));
+        }
+        return hexString.toString();
+    }
+
+    // Generate all password variations
+         private static Set<String> generatePasswordVariations(String input) {
+        Set<String> variations = new HashSet<>();
+        
+        // Add all new variations
+        variations.addAll(generatePermutations(input));
+        variations.addAll(caseVariations(input));
+        variations.addAll(leetSpeakTransformations(input));
+        variations.addAll(addPrefixesSuffixes(input));
+        variations.addAll(numberVariations(input));
+        variations.addAll(symbolVariations(input));
+        variations.addAll(generateContextualPasswords("User", "2024", input));
+        
+        return variations;
+    }
+
+    // Generate all unique permutations of the password guess
+        private static Set<String> generatePermutations(String input) {
+        Set<String> permutations = new HashSet<>();
+        permute("", input, permutations);
+        return permutations;
+    }
+
+    private static void permute(String prefix, String remaining, Set<String> permutations) {
+        int n = remaining.length();
+             if (n == 0) {
+            permutations.add(prefix);
+        } else {
+            for (int i = 0; i < n; i++) {
+                permute(prefix + remaining.charAt(i), remaining.substring(0, i) + remaining.substring(i + 1, n), permutations);
+            }
+        }
+    }
+
+    // Case variations
+         private static Set<String> caseVariations(String input) {
+        Set<String> variations = new HashSet<>();
+        int n = input.length();
+        int totalCombinations = 1 << n; // 2^n combinations
+
+        for (int i = 0; i < totalCombinations; i++) {
+            StringBuilder variation = new StringBuilder();
+            for (int j = 0; j < n; j++) {
+                char c = input.charAt(j);
+                variation.append((i & (1 << j)) == 0 ? Character.toLowerCase(c) : Character.toUpperCase(c));
+            }
+            variations.add(variation.toString());
+        }
+        return variations;
+    }
+
+    // Leet speak transformations
+    private static Set<String> leetSpeakTransformations(String input) {
+        Set<String> variations = new HashSet<>();
+        variations.add(input);
+        variations.add(input.replace("a", "4"));
+        variations.add(input.replace("e", "3"));
+        variations.add(input.replace("i", "1"));
+        variations.add(input.replace("o", "0"));
+        variations.add(input.replace("s", "5"));
+        return variations;
+    }
+
+    // Prefix and suffix variations
+    private static Set<String> addPrefixesSuffixes(String input) {
+        Set<String> variations = new HashSet<>();
+        String[] prefixes = {"", "123", "abc", "password", "letmein"};
+        String[] suffixes = {"", "123", "!", "@", "2024"};
+
+        for (String prefix : prefixes) {
+            for (String suffix : suffixes) {
+                variations.add(prefix + input + suffix);
+            }
+        }
+        return variations;
+    }
+
+    // Number variations
+    private static Set<String> numberVariations(String input) {
+        Set<String> variations = new HashSet<>();
+        for (int i = 0; i <= input.length(); i++) {
+            variations.add(input.substring(0, i) + "123" + input.substring(i));
+        }
+        return variations;
+    }
+
+    // Symbol variations
+    private static Set<String> symbolVariations(String input) {
+        Set<String> variations = new HashSet<>();
+        variations.add(input.replace("a", "@").replace("s", "$").replace("o", "0"));
+        return variations;
+    }
+
+    // Contextual passwords
+    private static Set<String> generateContextualPasswords(String username, String year, String input) {
+        Set<String> variations = new HashSet<>();
+        variations.add(username + year); // e.g., User2024
+        variations.add(input + username); // e.g., PasswordUser
+        variations.add(username + input); // e.g., UserPassword
+        return variations;
+    }
+
+    
+}
+
+
+
